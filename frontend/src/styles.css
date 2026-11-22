@@ -111,7 +111,7 @@ select { appearance: none; background: var(--paper); border: 1px solid var(--edg
 .sensor-context .field { display: flex; align-items: center; flex-wrap: wrap; }
 .sensor-context select { color: var(--ink); }
 .sensor-context .select-wrap svg { color: var(--olive); }
-.sensor-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.sensor-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 16px; }
 .metric-card { border-radius: 18px; padding: clamp(16px, 2.3vw, 26px); color: #4e6941; }
 .metric-card:nth-child(2) { color: #43706a; }
 .metric-card:nth-child(3) { color: #84672c; }

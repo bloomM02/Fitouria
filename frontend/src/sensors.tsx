@@ -7,8 +7,7 @@ const metrics = [
   { key: 'biochar_ph', name: 'pH du biochar', unit: '', icon: FlaskConical },
   { key: 'salt_index', name: 'Sel (indice simulé)', unit: '/ 100', icon: FlaskConical },
   { key: 'germination_pct', name: 'Germination', unit: '%', icon: FlaskConical },
-  { key: 'filter_inlet_pollution', name: 'Pollution à l’entrée du filtre', unit: '/ 100', icon: Droplets },
-  { key: 'filter_outlet_pollution', name: 'Pollution à la sortie du filtre', unit: '/ 100', icon: Droplets },
+  { key: 'filter_outlet_pollution', name: 'Pollution après filtration', unit: '/ 100', icon: Droplets },
 ] as const
 
 const statuses: Record<string, string> = {
@@ -59,7 +58,7 @@ function MetricCard({ metric, readings }: { metric: Metric; readings: Reading[] 
 }
 
 export function Sensors({ scenario }: { scenario: Scenario | null }) {
-  const [source, setSource] = useState<Source>('mqtt')
+  const [source, setSource] = useState<Source>('simulation')
   const [running, setRunning] = useState(true)
   const [data, setData] = useState<(Telemetry & { source: Source }) | null>(null)
   const [error, setError] = useState('')
