@@ -27,11 +27,28 @@ class PyrolysisTelemetry(BaseModel):
     temp: float = Field(ge=-40, le=1200)
     moist: float = Field(ge=0, le=100)
     ph: float | None = Field(None, ge=0, le=14)
+    salt: float | None = Field(None, ge=0, le=100)
+    germ: float | None = Field(None, ge=0, le=100)
+    feed: float | None = Field(None, ge=0, le=100)
+    out: float | None = Field(None, ge=0, le=100)
+    mar: str | None = Field(None, max_length=80)
+    removal: float | None = Field(None, ge=0, le=100)
+    vol: float | None = Field(None, ge=0)
+    heat: int | None = Field(None, ge=0, le=1)
+    fan: int | None = Field(None, ge=0, le=1)
+    pump: int | None = Field(None, ge=0, le=1)
+    alarm: int | None = Field(None, ge=0, le=1)
 
     def reading(self):
         return dict(device_id="wokwi-pyrolyse", temperature_c=None, power_w=None,
                     humidity_pct=None, pyrolysis_temp_c=self.temp, substrate_moisture_pct=self.moist,
-                    biochar_ph=self.ph, pyrolysis_stage=self.bio)
+                    biochar_ph=self.ph, pyrolysis_stage=self.bio,
+                    salt_index=self.salt, germination_pct=self.germ,
+                    filter_inlet_pollution=self.feed, filter_outlet_pollution=self.out,
+                    filtration_stage=self.mar,
+                    removal_pct=self.removal, filtered_volume=self.vol,
+                    heater_on=self.heat, fan_on=self.fan, pump_on=self.pump,
+                    alarm_on=self.alarm)
 
 
 def parse_mqtt_measurement(payload: bytes) -> dict:
@@ -41,13 +58,27 @@ def parse_mqtt_measurement(payload: bytes) -> dict:
         return PyrolysisTelemetry.model_validate_json(payload).reading()
 
 
-def demo_measurement() -> Measurement:
+class DemoMeasurement(Measurement):
+    biochar_ph: float
+    salt_index: float
+    germination_pct: float
+    filter_inlet_pollution: float
+    filter_outlet_pollution: float
+
+
+def demo_measurement() -> DemoMeasurement:
     phase = time.monotonic() / 8
-    return Measurement(
+    inlet_pollution = round(40 + 8 * math.sin(phase * 0.7), 1)
+    return DemoMeasurement(
         device_id="moulin-demo",
         temperature_c=round(25 + 2.5 * math.sin(phase), 1),
         humidity_pct=round(57 + 7 * math.cos(phase * 0.8), 1),
         power_w=round(1350 + 260 * math.sin(phase * 1.2), 1),
+        biochar_ph=round(7.5 + 0.5 * math.sin(phase), 2),
+        salt_index=round(30 + 6 * math.sin(phase * 0.8), 1),
+        germination_pct=round(85 + 5 * math.cos(phase * 0.8), 1),
+        filter_inlet_pollution=inlet_pollution,
+        filter_outlet_pollution=round(inlet_pollution * 0.1, 1),
     )
 
 

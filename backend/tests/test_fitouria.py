@@ -109,10 +109,20 @@ def test_alternative_pathways_conserve_mass_and_account_for_recovery(pathway, pr
 
 
 def test_legacy_wokwi_message_distinguishes_reactor_and_biochar_qc(client):
-    payload = b'{"bio":"PYRO","temp":480,"moist":24,"ph":8.2,"qc":"OK","heat":1}'
+    payload = (b'{"bio":"PYRO","temp":480,"moist":24,"ph":8.2,"qc":"OK","heat":1,'
+               b'"mar":"FILTERING","removal":90.0,"vol":22,"fan":0,"pump":1,"alarm":0,'
+               b'"salt":32,"germ":84,"feed":40.0,"out":4.0}')
     app.state.mqtt.on_message(None, None, SimpleNamespace(retain=False, payload=payload))
     item, = client.get("/api/telemetry?source=mqtt").json()["readings"]
     assert item["pyrolysis_temp_c"] == 480
     assert item["biochar_ph"] == 8.2
+    assert item["salt_index"] == 32
+    assert item["germination_pct"] == 84
+    assert item["filter_inlet_pollution"] == 40
+    assert item["filter_outlet_pollution"] == 4
+    assert item["filtration_stage"] == "FILTERING"
+    assert item["removal_pct"] == 90
+    assert item["filtered_volume"] == 22
+    assert (item["heater_on"], item["fan_on"], item["pump_on"], item["alarm_on"]) == (1, 0, 1, 0)
     assert item["power_w"] is None
     assert item["temperature_c"] is None

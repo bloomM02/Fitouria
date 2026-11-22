@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react'
-import { BrainCircuit, ChevronDown, Droplets, FlaskConical, History, Play, Pause, Radio, Thermometer, Zap } from 'lucide-react'
+import { BrainCircuit, ChevronDown, Droplets, FlaskConical, History, Play, Pause, Radio } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { api, number, type Reading, type Scenario, type Source, type Telemetry } from './api'
 
 const metrics = [
-  { key: 'temperature_c', name: 'Température de l’air', unit: '°C', icon: Thermometer },
-  { key: 'humidity_pct', name: 'Humidité de l’air', unit: '%', icon: Droplets },
-  { key: 'power_w', name: 'Puissance électrique', unit: 'W', icon: Zap },
-] as const
-const pyrolysisMetrics = [
-  { key: 'pyrolysis_temp_c', name: 'Température du réacteur', unit: '°C', icon: Thermometer },
-  { key: 'substrate_moisture_pct', name: 'Humidité du grignon', unit: '%', icon: Droplets },
   { key: 'biochar_ph', name: 'pH du biochar', unit: '', icon: FlaskConical },
+  { key: 'salt_index', name: 'Sel (indice simulé)', unit: '/ 100', icon: FlaskConical },
+  { key: 'germination_pct', name: 'Germination', unit: '%', icon: FlaskConical },
+  { key: 'filter_inlet_pollution', name: 'Pollution à l’entrée du filtre', unit: '/ 100', icon: Droplets },
+  { key: 'filter_outlet_pollution', name: 'Pollution à la sortie du filtre', unit: '/ 100', icon: Droplets },
 ] as const
 
 const statuses: Record<string, string> = {
@@ -24,10 +21,16 @@ const phases: Record<string, string> = {
   QUALITY_CHECK: 'Contrôle qualité', READY: 'Lot prêt', REJECTED: 'Lot rejeté',
 }
 const phaseName = (phase: string) => phases[phase] ?? phase
+const wokwiProject = 'https://wokwi.com/projects/481333689027006465'
+const stageNames: Record<string, string> = {
+  SETTLING: 'Décantation', DILUTING: 'Dilution', FILTERING: 'Filtration',
+}
+const stageLabel = (stage?: string | null) => stage && stage !== '-' ? stageNames[stage] ?? stage : '—'
+const equipmentState = (state?: number | null) => state == null ? '—' : state === 1 ? 'Actif' : 'Inactif'
 const display = (value: number | null | undefined, unit: string) =>
   value == null ? '—' : number(value, 2) + (unit ? ' ' + unit : '')
 
-type Metric = (typeof metrics | typeof pyrolysisMetrics)[number]
+type Metric = (typeof metrics)[number]
 
 function MetricCard({ metric, readings }: { metric: Metric; readings: Reading[] }) {
   const { key, name, unit, icon: Icon } = metric
@@ -56,7 +59,7 @@ function MetricCard({ metric, readings }: { metric: Metric; readings: Reading[] 
 }
 
 export function Sensors({ scenario }: { scenario: Scenario | null }) {
-  const [source, setSource] = useState<Source>('simulation')
+  const [source, setSource] = useState<Source>('mqtt')
   const [running, setRunning] = useState(true)
   const [data, setData] = useState<(Telemetry & { source: Source }) | null>(null)
   const [error, setError] = useState('')
@@ -89,7 +92,7 @@ export function Sensors({ scenario }: { scenario: Scenario | null }) {
   const readings = allReadings.filter(reading => reading.device_id === device).slice(-24)
   const latest = readings.at(-1)
   const legacy = latest?.pyrolysis_stage !== undefined
-  const activeMetrics = legacy ? pyrolysisMetrics : metrics
+  const isWokwiView = source === 'mqtt' && (!latest || legacy)
   function select(mode: Source) {
     setError('')
     if (mode !== source) setSelectedDevice('')
@@ -105,7 +108,7 @@ export function Sensors({ scenario }: { scenario: Scenario | null }) {
       <div className="sensor-toolbar">
         <div className="segment" role="group" aria-label="Source des mesures">
           <button aria-pressed={source === 'simulation'} onClick={() => select('simulation')}>Simulation</button>
-          <button aria-pressed={source === 'mqtt'} onClick={() => select('mqtt')}>MQTT / ESP32</button>
+          <button aria-pressed={source === 'mqtt'} onClick={() => select('mqtt')}>Wokwi / ESP32</button>
         </div>
         {source === 'simulation' && <button className="quiet sensor-pause" onClick={() => setRunning(!running)}>{running ? <Pause size={16} /> : <Play size={16} />}{running ? 'Pause' : 'Reprendre'}</button>}
       </div>
@@ -118,21 +121,37 @@ export function Sensors({ scenario }: { scenario: Scenario | null }) {
         </span></label>}
         <span>{scenario?.id ? 'Lot #' + scenario.id : 'Lot de démonstration'}</span>
         <span>{latest ? 'Relevé à ' + time.format(new Date(latest.timestamp)) + ' (Tunis)' : 'En attente de relevés'}</span>
-        {latest?.pyrolysis_stage && <span>{phaseName(latest.pyrolysis_stage)}</span>}
       </div>
     </section>
     <div className="sensor-metrics">
-      {activeMetrics.map(metric => <MetricCard key={metric.key} metric={metric} readings={readings} />)}
+      {metrics.map(metric => <MetricCard key={metric.key} metric={metric} readings={readings} />)}
     </div>
+    {isWokwiView && <section className="card panel mt-4">
+      <div className="panel-heading">
+        <h2>Simulateur Zitori</h2>
+        <a className="quiet" href={wokwiProject} target="_blank" rel="noreferrer">Ouvrir dans Wokwi</a>
+      </div>
+      {!latest && <p className="muted">Démarrez la simulation dans Wokwi pour recevoir les relevés de l’ESP32.</p>}
+      <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div><dt>Pyrolyse</dt><dd>{latest?.pyrolysis_stage ? phaseName(latest.pyrolysis_stage) : '—'}</dd></div>
+        <div><dt>Traitement des margines</dt><dd>{stageLabel(latest?.filtration_stage)}</dd></div>
+        <div><dt>Taux d’élimination</dt><dd>{display(latest?.removal_pct, '%')}</dd></div>
+        <div><dt>Volume filtré</dt><dd>{display(latest?.filtered_volume, '')}</dd></div>
+        <div><dt>Chauffage</dt><dd>{equipmentState(latest?.heater_on)}</dd></div>
+        <div><dt>Ventilateur</dt><dd>{equipmentState(latest?.fan_on)}</dd></div>
+        <div><dt>Pompe</dt><dd>{equipmentState(latest?.pump_on)}</dd></div>
+        <div><dt>Alarme</dt><dd>{equipmentState(latest?.alarm_on)}</dd></div>
+      </dl>
+    </section>}
     <div className="sensor-actions">
       <details className="card panel sensor-history">
         <summary><History size={17} /> Historique des mesures <ChevronDown size={16} /></summary>
         {readings.length ? <div className="table-wrap mt-3"><table>
-          <thead><tr><th>Reçu à (Tunis)</th><th>Lot à la réception</th>{legacy && <th>Phase</th>}{activeMetrics.map(({ key, name }) => <th key={key}>{name}</th>)}</tr></thead>
+          <thead><tr><th>Reçu à (Tunis)</th><th>Lot à la réception</th>{legacy && <th>Phase</th>}{metrics.map(({ key, name }) => <th key={key}>{name}</th>)}</tr></thead>
           <tbody>{readings.slice().reverse().map(reading => <tr key={reading.id}>
             <td>{dateTime.format(new Date(reading.timestamp))}</td><td>{reading.scenario_id ? '#' + reading.scenario_id : 'Démo'}</td>
             {legacy && <td>{reading.pyrolysis_stage ? phaseName(reading.pyrolysis_stage) : '—'}</td>}
-            {activeMetrics.map(({ key, unit }) => <td key={key}>{display(reading[key], unit)}</td>)}
+            {metrics.map(({ key, unit }) => <td key={key}>{display(reading[key], unit)}</td>)}
           </tr>)}</tbody>
         </table></div> : <p className="muted">Aucun relevé pour cette source.</p>}
       </details>

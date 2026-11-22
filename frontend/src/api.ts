@@ -49,6 +49,11 @@ export type Reading = {
   id: number; timestamp: string; scenario_id: number | null; device_id: string
   temperature_c: number | null; humidity_pct: number | null; power_w: number | null; source: Source
   pyrolysis_temp_c?: number; substrate_moisture_pct?: number; biochar_ph?: number | null; pyrolysis_stage?: string
+  filtration_stage?: string | null
+  salt_index?: number | null; germination_pct?: number | null
+  filter_inlet_pollution?: number | null; filter_outlet_pollution?: number | null
+  removal_pct?: number | null; filtered_volume?: number | null
+  heater_on?: number | null; fan_on?: number | null; pump_on?: number | null; alarm_on?: number | null
 }
 export type Telemetry = { readings: Reading[]; mqtt: string }
 
