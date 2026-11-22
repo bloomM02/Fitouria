@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Olive Valo – Maquette animée</title>
+<style>
+:root{--bg:#eef2e6;--sky:#dcebf3;--gr:#a9c07a;--tx:#1f2a1f;--mut:#5c675a;--eq:#fff;--ln:#4b5a45;--card:#fff;--bd:#cfd6c2;--gold:#b8860b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11160f;--sky:#1a2631;--gr:#34452a;--tx:#e8eee2;--mut:#9aa595;--eq:#27311f;--ln:#9bb08a;--card:#1d241a;--bd:#33402e;--gold:#e0b84a}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:12px}
+h1{font-size:1.25rem;margin:.2rem 0 8px}
+.top{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+button,select{font-size:1rem;border-radius:8px;padding:8px 14px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
+button.p{background:#5b7f2a;color:#fff;border:0;font-weight:700}
+#cap{flex:1;min-width:240px;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;font-weight:600}
+.wrap{background:var(--sky);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+svg{display:block;width:100%;height:auto}
+.eq{fill:var(--eq);stroke:var(--ln);stroke-width:2.5}.ln{fill:none;stroke:var(--ln);stroke-width:2.5}
+text{fill:var(--tx);font-size:13px;font-family:inherit}.lb{font-weight:700}.sm{font-size:11px;fill:var(--mut)}
+.g{opacity:.3;transition:opacity .6s}.g.on{opacity:1}
+.gear{transform-box:fill-box;transform-origin:center}.run .gear{animation:spin 1.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.flame{opacity:0;transform-box:fill-box;transform-origin:bottom}.hot .flame{opacity:1;animation:fl .35s ease-in-out infinite alternate}
+@keyframes fl{to{transform:scale(1.15,.8)}}
+.bub{fill:#fff;opacity:0;stroke:#7fb3d6}.bon .bub{animation:bu 2.6s linear infinite}
+@keyframes bu{0%{opacity:.9;transform:translateY(0)}100%{opacity:0;transform:translateY(-120px)}}
+.shake.on .eng{animation:sh .12s linear infinite}@keyframes sh{50%{transform:translate(1.5px,0)}}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px}
+.chip{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:6px 10px;font-size:.8rem;color:var(--mut)}
+.chip b{display:block;font-size:1.05rem;color:var(--tx);font-variant-numeric:tabular-nums}.chip.gd b{color:var(--gold)}
+small{color:var(--mut);display:block;margin-top:8px}
+</style>
+</head>
+<body>
+<main>
+<h1>🫒 Olive Valo – maquette animée de l’usine</h1>
+<div class="top">
+  <button class="p" id="go">▶ Verser 1 000 kg d’olives</button>
+  <button id="rs">↺ Réinitialiser</button>
+  <select id="sp"><option value="1">Vitesse ×1</option><option value="1.8">×2</option></select>
+  <div id="cap">Appuyez sur « Verser » pour lancer la simulation.</div>
+</div>
+
+<div class="wrap">
+<svg id="sv" viewBox="0 0 1000 570" role="img" aria-label="Maquette animée de l’usine de valorisation des olives">
+  <rect x="0" y="470" width="1000" height="100" fill="var(--gr)"/>
+  <!-- 1 trémie -->
+  <g class="g" id="g1">
+    <ellipse cx="90" cy="92" rx="48" ry="14" fill="#6b7a2a" stroke="var(--ln)" stroke-width="2"/>
+    <circle cx="70" cy="85" r="7" fill="#556022"/><circle cx="92" cy="80" r="7" fill="#7b8a33"/><circle cx="112" cy="86" r="7" fill="#556022"/>
+    <polygon class="eq" points="40,200 140,200 112,280 68,280"/>
+    <path class="ln" d="M90 280V330H190"/>
+    <text class="lb" x="40" y="190">1 · Trémie</text>
+  </g>
+  <!-- 2 moulin -->
+  <g class="g" id="g2">
+    <rect class="eq" x="190" y="280" width="120" height="100" rx="8"/>
+    <g class="gear"><circle cx="250" cy="330" r="26" fill="none" stroke="var(--ln)" stroke-width="7" stroke-dasharray="9 7"/><circle cx="250" cy="330" r="6" fill="var(--ln)"/></g>
+    <text class="lb" x="204" y="270">2 · Moulin</text>
+    <rect class="eq" x="360" y="150" width="70" height="95" rx="6"/>
+    <rect id="oil" x="362" y="243" width="66" height="0" fill="#d9a21b"/>
+    <text class="lb" x="352" y="140">Huile</text><text class="sm" id="toil" x="362" y="262"></text>
+    <path class="ln" d="M270 280V200H360"/>
+    <path class="ln" d="M250 380V478H632V420H650"/>
+  </g>
+  <!-- 3 pyrolyse -->
+  <g class="g" id="g3">
+    <rect class="eq" x="400" y="330" width="90" height="110" rx="10"/>
+    <g class="flame"><path d="M430 440q-10-20 5-34 2 12 10 10 -2-12 8-22 12 24 8 46z" fill="#f08a24"/><path d="M440 440q-4-12 4-20 2 6 6 5 6 10 0 15z" fill="#ffd24a"/></g>
+    <rect x="404" y="334" width="82" height="22" fill="#d9541e" opacity=".25" rx="6"/>
+    <text class="lb" x="400" y="322">3 · Pyrolyse</text><text id="tT" class="sm" x="405" y="372">20 °C</text>
+    <path class="ln" d="M310 360H400M490 420H560V452"/>
+    <polygon id="pile" points="530,470 565,470 548,470" fill="#262626"/>
+    <text class="lb" x="572" y="462">Biochar</text>
+  </g>
+  <!-- 4 digesteur -->
+  <g class="g" id="g4">
+    <path class="eq" d="M650 440V280a65 65 0 0 1 130 0V440z"/>
+    <rect x="652" y="300" width="126" height="138" fill="#8a6a3c" opacity=".35"/>
+    <g id="bb"><circle class="bub" cx="680" cy="420" r="5" style="animation-delay:0s"/><circle class="bub" cx="705" cy="425" r="4" style="animation-delay:.7s"/><circle class="bub" cx="730" cy="420" r="6" style="animation-delay:1.3s"/><circle class="bub" cx="755" cy="425" r="4" style="animation-delay:1.9s"/><circle class="bub" cx="692" cy="430" r="3" style="animation-delay:2.2s"/></g>
+    <text class="lb" x="650" y="204">4 · Digesteur</text>
+    <rect x="652" y="352" width="124" height="46" rx="6" fill="var(--card)" stroke="var(--ln)" opacity=".92"/>
+    <text id="sph" class="sm" x="660" y="368">pH –</text><text id="stp" class="sm" x="660" y="383">T – °C</text><text id="spr" class="sm" x="660" y="396" style="display:none"></text>
+    <text id="spr2" class="sm" x="720" y="368">– mbar</text><text id="spmp" class="sm" x="720" y="383">Pompe –</text>
+    <path class="ln" d="M450 330V290H650M715 215V190H850V262"/>
+  </g>
+  <!-- 5 eau -->
+  <g class="g" id="g5">
+    <path class="ln" d="M715 440V490"/>
+    <rect class="eq" x="655" y="490" width="120" height="55" rx="6"/>
+    <rect id="wt" x="657" y="543" width="116" height="0" fill="#4a95d0" opacity=".8"/>
+    <text class="lb" x="655" y="563">5 · Eau récupérée</text><text id="twa" class="sm" x="668" y="522" style="fill:#fff;font-weight:700"></text>
+    <path class="ln" d="M775 520H850"/>
+    <g id="pl" opacity="0"><circle cx="865" cy="525" r="10" fill="#5b9a2a"/><circle cx="895" cy="520" r="12" fill="#6fb33a"/><circle cx="925" cy="526" r="10" fill="#5b9a2a"/><text class="sm" x="852" y="552">Irrigation</text></g>
+  </g>
+  <!-- 6 cogénération -->
+  <g class="g shake" id="g6">
+    <g class="eng"><rect class="eq" x="830" y="262" width="100" height="120" rx="8"/><circle cx="880" cy="322" r="24" fill="none" stroke="var(--ln)" stroke-width="3"/><text x="867" y="328" class="lb">CHP</text></g>
+    <text class="lb" x="820" y="254">6 · Cogénération</text>
+    <path class="ln" d="M900 262V120H975"/>
+    <path class="ln" d="M830 350H780"/>
+    <path class="ln" d="M940 470L960 100L980 470M946 400H974M950 330H970M953 260H967M946 150H976" />
+    <text id="tel" class="sm" x="835" y="400"></text><text id="tth" class="sm" x="835" y="414"></text>
+  </g>
+  <!-- 7 gains -->
+  <g class="g" id="g7">
+    <rect x="560" y="22" width="250" height="62" rx="10" fill="var(--card)" stroke="var(--gold)" stroke-width="3"/>
+    <text class="lb" x="576" y="44">7 · Gains estimés</text>
+    <text id="dt" x="576" y="74" style="font-size:24px;font-weight:700;fill:var(--gold)">0 DT</text>
+  </g>
+  <g id="fx"></g>
+</svg>
+</div>
+
+<div class="chips">
+  <div class="chip">Olives<b id="c1">0 kg</b></div><div class="chip">Huile<b id="c2">0 kg</b></div>
+  <div class="chip">Grignons<b id="c3">0 kg</b></div><div class="chip">Biochar<b id="c4">0 kg</b></div>
+  <div class="chip">Biogaz<b id="c5">0 m³</b></div><div class="chip">Eau<b id="c6">0 L</b></div>
+  <div class="chip">Électricité<b id="c7">0 kWh</b></div><div class="chip">Chaleur<b id="c8">0 kWh</b></div>
+  <div class="chip gd">Gain total<b id="c9">0 DT</b></div>
+</div>
+<small>Valeurs illustratives : huile 20 %, grignons 50 %, eau de végétation 30 %, biochar 28 % de la matière sèche, biogaz 0,12 m³/kg, 6 kWh/m³, rendement électrique 35 % et thermique 45 %. Prix en DT (objet <code>P</code> du script) à remplacer par les tarifs réels.</small>
+</main>
+<script>
+const NS='http://www.w3.org/2000/svg',$=i=>document.getElementById(i),sv=$('sv'),fx=$('fx');
+const P={elec:.35,heat:.10,biochar:1.5,water:.002},M=1000;
+const B={oil:200,pom:500,veg:300,char:70,gas:120,el:252,th:324,wat:240};
+const f=(n,d=0)=>n.toLocaleString('fr-FR',{maximumFractionDigits:d});
+const gain=B.el*P.elec+B.th*P.heat+B.char*P.biochar+B.wat*P.water;
+let tok=0,spd=1,ticks=[];
+const sleepF=(ms,t)=>new Promise(r=>setTimeout(()=>r(t===tok),ms));
+function spawn(pts,col,r,t){
+  const c=document.createElementNS(NS,'circle');c.setAttribute('r',r);c.setAttribute('fill',col);fx.appendChild(c);
+  let L=[],tot=0;for(let i=1;i<pts.length;i++){const d=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);L.push(d);tot+=d}
+  const t0=performance.now(),v=150*spd/1000;
+  (function s(now){if(t!==tok){c.remove();return}let d=(now-t0)*v;if(d>=tot){c.remove();return}
+    let i=0;while(d>L[i]){d-=L[i];i++}const a=pts[i],b=pts[i+1],k=d/L[i];
+    c.setAttribute('cx',a[0]+(b[0]-a[0])*k);c.setAttribute('cy',a[1]+(b[1]-a[1])*k);requestAnimationFrame(s)})(t0);
+}
+function stage(n,cap,dur,src,upd,t){
+  $('cap').textContent=cap;$('g'+n).classList.add('on');
+  return new Promise(res=>{
+    const t0=performance.now(),D=dur/spd;let last=[];src.forEach(()=>last.push(0));
+    (function s(now){if(t!==tok)return res(false);const p=Math.min(1,(now-t0)/D);
+      src.forEach((o,i)=>{if(now-last[i]>o.e/spd){last[i]=now;spawn(o.p,o.c,o.r,t)}});upd&&upd(p);
+      p<1?requestAnimationFrame(s):res(true)})(t0);
+  });
+}
+function reset(){
+  tok++;fx.innerHTML='';document.querySelectorAll('.g').forEach(g=>g.classList.remove('on'));
+  $('g2').classList.remove('run');$('g3').classList.remove('hot');$('g4').classList.remove('bon');
+  $('oil').setAttribute('height',0);$('oil').setAttribute('y',243);$('wt').setAttribute('height',0);$('wt').setAttribute('y',543);
+  $('pile').setAttribute('points','530,470 565,470 548,470');$('pl').setAttribute('opacity',0);
+  ['toil','twa','tel','tth'].forEach(i=>$(i).textContent='');$('tT').textContent='20 °C';
+  $('sph').textContent='pH –';$('stp').textContent='T – °C';$('spr2').textContent='– mbar';$('spmp').textContent='Pompe –';
+  for(let i=1;i<=9;i++)$('c'+i).textContent='0';$('c1').textContent='0 kg';$('dt').textContent='0 DT';$('c9').textContent='0 DT';
+  $('cap').textContent='Appuyez sur « Verser » pour lancer la simulation.';$('go').disabled=false;
+}
+setInterval(()=>{if(!$('g4').classList.contains('bon'))return;
+  $('sph').textContent='pH '+(7.1+Math.random()*.3-.15).toFixed(2);$('stp').textContent='T '+(37+Math.random()*1.2-.6).toFixed(1)+' °C';
+  $('spr2').textContent=(14+Math.random()*4).toFixed(1)+' mbar';$('spmp').textContent='Pompe ON'},600);
+async function run(){
+  reset();const t=tok;$('go').disabled=true;spd=+$('sp').value;
+  const L=(a,b)=>a+(b-a);
+  // 1
+  let ok=await stage(1,'1 · On verse 1 000 kg d’olives dans la trémie…',4500,
+   [{p:[[90,95],[90,330],[190,330]],c:'#6b7a2a',r:7,e:260}],p=>{$('c1').textContent=f(M*p)+' kg'},t);if(!ok)return;
+  // 2
+  $('g2').classList.add('run');
+  ok=await stage(2,'2 · Le moulin sépare huile, grignons et eau de végétation.',5500,[
+   {p:[[270,285],[270,200],[360,200],[395,225]],c:'#d9a21b',r:5,e:420},
+   {p:[[310,360],[400,360]],c:'#6b4a2a',r:6,e:420},
+   {p:[[250,385],[250,478],[632,478],[632,420],[655,420]],c:'#8fc4e8',r:5,e:420}],
+   p=>{const h=80*p;$('oil').setAttribute('height',h);$('oil').setAttribute('y',243-h);$('toil').textContent=f(B.oil*p)+' kg';
+   $('c2').textContent=f(B.oil*p)+' kg';$('c3').textContent=f(B.pom*p)+' kg'},t);if(!ok)return;
+  $('g2').classList.remove('run');
+  // 3
+  $('g3').classList.add('hot');
+  ok=await stage(3,'3 · Les grignons sont chauffés sans oxygène : ils deviennent du biochar.',5500,
+   [{p:[[490,420],[560,420],[560,455]],c:'#222',r:5,e:500}],p=>{
+   $('tT').textContent=f(20+480*Math.min(1,p*1.6))+' °C';const w=18+22*p,h=8+34*p;
+   $('pile').setAttribute('points',`${548-w},470 ${548+w},470 548,${470-h}`);$('c4').textContent=f(B.char*p)+' kg'},t);if(!ok)return;
+  $('g3').classList.remove('hot');
+  // 4
+  $('g4').classList.add('bon');
+  ok=await stage(4,'4 · Co-digestion : grignons et eau de végétation entrent dans le digesteur ; les capteurs surveillent pH, température et pression.',6000,[
+   {p:[[450,335],[450,290],[650,290],[690,310]],c:'#6b4a2a',r:5,e:600},
+   {p:[[715,225],[715,190],[850,190],[850,265]],c:'#ffffff',r:6,e:450},
+   {p:[[250,385],[250,478],[632,478],[632,420],[655,420]],c:'#8fc4e8',r:5,e:900}],p=>{$('c5').textContent=f(B.gas*p)+' m³'},t);if(!ok)return;
+  // 5
+  $('pl').setAttribute('opacity',1);
+  ok=await stage(5,'5 · Le digestat liquide sort du digesteur, est traité dans le bac, puis part à l’irrigation.',5500,
+   [{p:[[715,442],[715,505]],c:'#8fc4e8',r:5,e:400},{p:[[775,520],[850,520],[870,520]],c:'#4a95d0',r:5,e:500}],p=>{const w=45*p;$('wt').setAttribute('height',w);$('wt').setAttribute('y',543-w);$('twa').textContent=f(B.wat*p)+' L';$('c6').textContent=f(B.wat*p)+' L'},t);if(!ok)return;
+  // 6
+  ok=await stage(6,'6 · La cogénération transforme le biogaz en électricité et en chaleur.',5500,[
+   {p:[[900,265],[900,120],[975,120]],c:'#f2c200',r:6,e:350},
+   {p:[[830,350],[780,350]],c:'#e0542a',r:5,e:450}],p=>{
+   $('c7').textContent=f(B.el*p)+' kWh';$('c8').textContent=f(B.th*p)+' kWh';$('tel').textContent='⚡ '+f(B.el*p)+' kWh';$('tth').textContent='♨ '+f(B.th*p)+' kWh'},t);if(!ok)return;
+  // 7
+  ok=await stage(7,'7 · Chaque flux valorisé est converti en gain estimé (DT).',5000,[
+   {p:[[880,262],[740,70],[700,60]],c:'#e0b84a',r:7,e:500},
+   {p:[[548,440],[640,120],[640,70]],c:'#e0b84a',r:7,e:700},
+   {p:[[460,490],[600,90],[620,70]],c:'#e0b84a',r:5,e:1100}],p=>{const v=gain*p;$('dt').textContent=f(v,1)+' DT';$('c9').textContent=f(v,1)+' DT'},t);if(!ok)return;
+  $('cap').textContent='Simulation terminée : gain estimé ≈ '+f(gain)+' DT pour 1 000 kg d’olives (hors vente de l’huile).';
+  $('go').disabled=false;
+}
+$('go').onclick=run;$('rs').onclick=reset;
+</script>
+</body>
+</html>
