@@ -172,14 +172,6 @@ export function Simulation({ scenario, onSave }: { scenario: Scenario | null; on
   return <>
     <div className="page-head"><h1>Simulation</h1><p>Transformez un lot d’olives et calculez la valeur de ses produits.</p></div>
     <section className="card panel mb-5">
-      <div className="panel-heading">
-        <h2>Maquette animée du moulin</h2>
-        <a className="quiet" href="/maquette-olive-valo.html" target="_blank" rel="noreferrer">Agrandir la maquette</a>
-      </div>
-      <iframe className="w-full rounded-xl border-0" style={{ height: 'clamp(420px, 61vw, 750px)' }}
-        src="/maquette-olive-valo.html" title="Maquette animée des filières de valorisation" loading="lazy" />
-    </section>
-    <section className="card panel mb-5">
       <h2>Prix observé de l’huile d’olive</h2>
       <p><strong>12,600 DT/L</strong> pour l’huile d’olive en vrac. Prix moyen de détail à Tunis en juillet 2026.</p>
       <p className="muted mt-2">La marge réelle nécessite le prix de vente de l’huilerie, ses coûts et ses quantités mesurées.
