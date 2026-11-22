@@ -5,3 +5,10 @@ services:
     plan: free
     region: frankfurt
     healthCheckPath: /api/health
+    envVars:
+      - key: MQTT_HOST
+        value: broker.hivemq.com
+      - key: MQTT_PORT
+        value: "1883"
+      - key: MQTT_TOPIC
+        value: Zitori/Zitori/data

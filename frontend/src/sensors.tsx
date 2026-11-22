@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react'
-import { BrainCircuit, ChevronDown, Droplets, FlaskConical, History, Play, Pause, Radio } from 'lucide-react'
+import { BrainCircuit, ChevronDown, Droplets, FlaskConical, History, Radio } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { api, number, type Reading, type Scenario, type Source, type Telemetry } from './api'
+import { api, number, type Reading, type Scenario, type Telemetry } from './api'
+
+const labStudy = 'https://qspace.qu.edu.qa/bitstream/handle/10576/33092/Abid%20et%20al%2C%202022.pdf?isAllowed=n&sequence=1'
+const labMeasurements = [
+  { name: 'pH du biochar', value: '10,8 ± 0,05', sample: 'Biochar issu de résidus d’Agareb, produit à 450 °C. Tableau 2.' },
+  { name: 'Conductivité des margines', value: '14,4 ± 0,1 mS/cm', sample: 'Margines brutes de Sfax. Indicateur des ions dissous. Tableau 1.' },
+  { name: 'Indice de germination', value: '20 ± 1,5 %', sample: 'Cresson exposé aux margines centrifugées, contre 0 % avec les margines brutes. Tableau 1.' },
+  { name: 'Pollution organique · DCO', value: '47,4 ± 2,8 g O₂/L', sample: 'Margines centrifugées, contre 68,35 ± 1,76 g O₂/L avant traitement. Tableau 1.' },
+]
 
 const metrics = [
   { key: 'biochar_ph', name: 'pH du biochar', unit: '', icon: FlaskConical },
@@ -58,22 +66,18 @@ function MetricCard({ metric, readings }: { metric: Metric; readings: Reading[] 
 }
 
 export function Sensors({ scenario }: { scenario: Scenario | null }) {
-  const [source, setSource] = useState<Source>('simulation')
-  const [running, setRunning] = useState(true)
-  const [data, setData] = useState<(Telemetry & { source: Source }) | null>(null)
+  const [source, setSource] = useState<'lab' | 'mqtt'>('lab')
+  const [data, setData] = useState<Telemetry | null>(null)
   const [error, setError] = useState('')
   const [selectedDevice, setSelectedDevice] = useState('')
 
   useEffect(() => {
+    if (source !== 'mqtt') return
     const controller = new AbortController()
     let timer: number
-    const sampling = source === 'simulation' && running
     async function poll() {
       try {
-        const next = sampling
-          ? await api<Telemetry>('/telemetry/simulate', {}, controller.signal)
-          : await api<Telemetry>('/telemetry?source=' + source, undefined, controller.signal)
-        setData({ ...next, source })
+        setData(await api<Telemetry>('/telemetry?source=mqtt', undefined, controller.signal))
         setError('')
       } catch (e) {
         if (!controller.signal.aborted) setError((e as Error).message)
@@ -83,16 +87,16 @@ export function Sensors({ scenario }: { scenario: Scenario | null }) {
     }
     void poll()
     return () => { controller.abort(); window.clearTimeout(timer) }
-  }, [source, running])
+  }, [source])
 
-  const allReadings = data?.source === source ? data.readings : []
+  const allReadings = data?.readings ?? []
   const devices = Array.from(new Set(allReadings.map(reading => reading.device_id)))
   const device = devices.includes(selectedDevice) ? selectedDevice : allReadings.at(-1)?.device_id
   const readings = allReadings.filter(reading => reading.device_id === device).slice(-24)
   const latest = readings.at(-1)
   const legacy = latest?.pyrolysis_stage !== undefined
   const isWokwiView = source === 'mqtt' && (!latest || legacy)
-  function select(mode: Source) {
+  function select(mode: 'lab' | 'mqtt') {
     setError('')
     if (mode !== source) setSelectedDevice('')
     setSource(mode)
@@ -102,17 +106,16 @@ export function Sensors({ scenario }: { scenario: Scenario | null }) {
     <section className="sensor-header">
       <div className="sensor-header-main">
         <h1>Capteurs IoT</h1>
-        <span className="sensor-source"><Radio size={16} />{source === 'simulation' ? 'Moulin simulé' : statuses[data?.mqtt ?? 'connecting']}</span>
+        <span className="sensor-source"><Radio size={16} />{source === 'lab' ? 'Mesures publiées · Sfax, 2022' : statuses[data?.mqtt ?? 'connecting']}</span>
       </div>
       <div className="sensor-toolbar">
         <div className="segment" role="group" aria-label="Source des mesures">
-          <button aria-pressed={source === 'simulation'} onClick={() => select('simulation')}>Simulation</button>
+          <button aria-pressed={source === 'lab'} onClick={() => select('lab')}>Mesures de laboratoire</button>
           <button aria-pressed={source === 'mqtt'} onClick={() => select('mqtt')}>Wokwi / ESP32</button>
         </div>
-        {source === 'simulation' && <button className="quiet sensor-pause" onClick={() => setRunning(!running)}>{running ? <Pause size={16} /> : <Play size={16} />}{running ? 'Pause' : 'Reprendre'}</button>}
       </div>
       {error && <p className="error" role="alert">{error}</p>}
-      <div className="sensor-context">
+      {source === 'mqtt' && <div className="sensor-context">
         {source === 'mqtt' && devices.length > 0 && <label className="field"><span>Appareil affiché</span><span className="select-wrap">
           <select value={device} onChange={e => setSelectedDevice(e.target.value)}>
             {devices.map(item => <option key={item} value={item}>{item}</option>)}
@@ -120,8 +123,20 @@ export function Sensors({ scenario }: { scenario: Scenario | null }) {
         </span></label>}
         <span>{scenario?.id ? 'Lot #' + scenario.id : 'Lot de démonstration'}</span>
         <span>{latest ? 'Relevé à ' + time.format(new Date(latest.timestamp)) + ' (Tunis)' : 'En attente de relevés'}</span>
-      </div>
+      </div>}
     </section>
+    {source === 'lab' ? <>
+      <div className="sensor-metrics">
+        {labMeasurements.map(({ name, value, sample }) => <section key={name} className="card panel metric-card">
+          <h2>{name}</h2>
+          <strong className="text-2xl">{value}</strong>
+          <p className="muted mt-2">{sample}</p>
+        </section>)}
+      </div>
+      <p className="muted mt-4">Résultats d’essais publiés par Abid et al. Les cartes présentent les valeurs de l’étude.
+        <a className="text-link" href={labStudy} target="_blank" rel="noreferrer">Consulter les tableaux 1 et 2</a>
+      </p>
+    </> : <>
     <div className="sensor-metrics">
       {metrics.map(metric => <MetricCard key={metric.key} metric={metric} readings={readings} />)}
     </div>
@@ -130,7 +145,10 @@ export function Sensors({ scenario }: { scenario: Scenario | null }) {
         <h2>Simulateur Zitori</h2>
         <a className="quiet" href={wokwiProject} target="_blank" rel="noreferrer">Ouvrir dans Wokwi</a>
       </div>
-      {!latest && <p className="muted">Démarrez la simulation dans Wokwi pour recevoir les relevés de l’ESP32.</p>}
+      <p className="muted">Le circuit virtuel envoie des valeurs simulées. Consultez le moniteur série de Wokwi pour vérifier la publication MQTT.</p>
+      {!latest && <p className="muted mt-2">{data?.mqtt === 'disabled'
+        ? 'Le serveur doit être configuré avec le même broker et le même sujet MQTT que le sketch.'
+        : 'Démarrez la simulation dans Wokwi pour recevoir les relevés de l’ESP32.'}</p>}
       <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div><dt>Pyrolyse</dt><dd>{latest?.pyrolysis_stage ? phaseName(latest.pyrolysis_stage) : '—'}</dd></div>
         <div><dt>Traitement des margines</dt><dd>{stageLabel(latest?.filtration_stage)}</dd></div>
@@ -156,5 +174,6 @@ export function Sensors({ scenario }: { scenario: Scenario | null }) {
       </details>
       <Link className="quiet" to={{ pathname: '/intelligence-artificielle', search: new URLSearchParams({ source, ...(device ? { device } : {}) }).toString(), hash: '#diagnostic' }}><BrainCircuit size={17} /> Diagnostic IA</Link>
     </div>
+    </>}
   </div>
 }

@@ -30,7 +30,7 @@ function Home({ scenario }: { scenario: Scenario | null }) {
       <div><span className="eyebrow">Scénario actif</span><strong>{scenario.inputs.context !== 'custom' ? lotContexts[scenario.inputs.context] : scenario.id ? 'Lot #' + scenario.id : 'Lot de démonstration'}</strong></div>
       <div><span>Olives traitées</span><strong>{number(scenario.inputs.olives_kg)} kg</strong></div>
       <div><span>Huile produite</span><strong>{number(scenario.results.oil_l)} L</strong></div>
-      <div><span>Marge estimée</span><strong>{money(scenario.results.margin)}</strong></div>
+      <div><span>Marge du scénario</span><strong>{money(scenario.results.margin)}</strong></div>
     </section>}
     <section className="mt-11">
       <h2 className="section-title">Explorer le laboratoire</h2>

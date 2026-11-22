@@ -171,6 +171,25 @@ function Batch({ initial, onSave }: { initial: Scenario; onSave: (scenario: Scen
 export function Simulation({ scenario, onSave }: { scenario: Scenario | null; onSave: (scenario: Scenario) => void }) {
   return <>
     <div className="page-head"><h1>Simulation</h1><p>Transformez un lot d’olives et calculez la valeur de ses produits.</p></div>
-    {scenario ? <Batch initial={scenario} onSave={onSave} /> : <p>Chargement du scénario…</p>}
+    <section className="card panel mb-5">
+      <div className="panel-heading">
+        <h2>Maquette animée du moulin</h2>
+        <a className="quiet" href="/maquette-olive-valo.html" target="_blank" rel="noreferrer">Agrandir la maquette</a>
+      </div>
+      <iframe className="w-full rounded-xl border-0" style={{ height: 'clamp(420px, 61vw, 750px)' }}
+        src="/maquette-olive-valo.html" title="Maquette animée des filières de valorisation" loading="lazy" />
+    </section>
+    <section className="card panel mb-5">
+      <h2>Prix observé de l’huile d’olive</h2>
+      <p><strong>12,600 DT/L</strong> pour l’huile d’olive en vrac. Prix moyen de détail à Tunis en juillet 2026.</p>
+      <p className="muted mt-2">La marge réelle nécessite le prix de vente de l’huilerie, ses coûts et ses quantités mesurées.
+        <a className="text-link" href="https://www.ins.tn/sites/default/files-ftp3/files/publication/pdf/bms%20Juillet%202026_3.pdf"
+          target="_blank" rel="noreferrer">INS, tableau 9.1</a>
+      </p>
+    </section>
+    <details className="card panel mb-5">
+      <summary>Calculateur pédagogique · hypothèses modifiables</summary>
+      <div className="mt-4">{scenario ? <Batch initial={scenario} onSave={onSave} /> : <p>Chargement du scénario…</p>}</div>
+    </details>
   </>
 }

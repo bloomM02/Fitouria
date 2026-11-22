@@ -45,6 +45,7 @@ void reconnect() {
   while (!mqtt.connected()) {
     String id = "olea-" + String(random(0xffff), HEX);
     if (mqtt.connect(id.c_str())) break;
+    Serial.printf("Connexion MQTT échouée (code %d)\n", mqtt.state());
     delay(2000);
   }
 }
@@ -148,7 +149,8 @@ void step() {
     feed, outP, removal, sat, vol, pump, soilMsg.c_str(), ph, salt, germ, alarmOn);
 
   Serial.println(buf);
-  mqtt.publish(TOPIC, buf);
+  if (mqtt.publish(TOPIC, buf)) Serial.printf("MQTT publié sur %s\n", TOPIC);
+  else Serial.println("Publication MQTT échouée");
 }
 
 void setup() {
@@ -164,6 +166,7 @@ void setup() {
 
   mqtt.setServer(MQTT_HOST, 1883);
   mqtt.setBufferSize(512);
+  Serial.printf("MQTT : %s:1883 / %s\n", MQTT_HOST, TOPIC);
 }
 
 void loop() {

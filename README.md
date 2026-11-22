@@ -29,8 +29,8 @@ Ouvrir [Fitouria](http://localhost:5173). Vite relaie les requêtes `/api` vers 
 ## Démonstration
 
 1. Dans **Simulation**, modifier la masse et le rendement, puis sélectionner **Calculer et animer**. Ouvrir **Prix et coûts** pour personnaliser les hypothèses. Chaque calcul valide crée un lot en SQLite et devient le scénario actif.
-2. Dans **Capteurs IoT**, le mode Simulation génère une mesure synthétique environ toutes les 2,5 secondes tant que la page est ouverte et la génération active. **MQTT / ESP32** affiche un historique lié à la source MQTT. Le lot indiqué sur chaque mesure est celui qui était actif à sa réception.
-3. Dans **Intelligence artificielle**, comparer les débouchés du lot actif avec des prix et des coûts de traitement distincts par filière. Pour essayer la détection de relevés atypiques, laisser tourner **Capteurs IoT** jusqu’à disposer de 31 mesures comparables, soit environ 75 secondes en simulation, puis actualiser l’analyse.
+2. Dans **Capteurs IoT**, les **Mesures de laboratoire** présentent les résultats publiés par Abid et al. (2022) sur le biochar et les margines. **Wokwi / ESP32** affiche les relevés simulés reçus par MQTT. Le lot indiqué sur chaque relevé est celui qui était actif à sa réception.
+3. Dans **Intelligence artificielle**, comparer les débouchés du lot actif avec des prix et des coûts de traitement distincts par filière. Le détecteur demande 31 relevés comparables. Les références de laboratoire ne constituent pas un historique pour le diagnostic.
 4. Revenir à **Accueil** pour retrouver les ordres de grandeur du dernier scénario calculé.
 
 Les données locales sont stockées dans `backend/fitouria.sqlite3`. `FITOURIA_DB` permet d’utiliser un autre fichier. Le prototype utilise un espace de travail partagé et se lance avec un processus API.
@@ -56,7 +56,7 @@ $env:MQTT_TOPIC = "fitouria/mon-groupe-unique/telemetry"
 .venv/Scripts/python.exe -m uvicorn backend.main:app --reload
 ```
 
-Dans un projet ESP32 Arduino Wokwi, copier [sketch.ino](backend/wokwi/sketch.ino), [diagram.json](backend/wokwi/diagram.json) et [libraries.txt](backend/wokwi/libraries.txt), puis adapter `TOPIC`. Le DHT22 produit la température et l’humidité. Le potentiomètre représente une puissance simulée de 0 à 2 000 W. Démarrer Wokwi et ouvrir l’onglet **MQTT / ESP32** dans Fitouria. Le broker public de l’exemple est destiné aux données de démonstration.
+Le [projet Wokwi Zitori](https://wokwi.com/projects/481333689027006465) utilise les fichiers [sketch.ino](backend/wokwi/sketch.ino), [diagram.json](backend/wokwi/diagram.json) et [libraries.txt](backend/wokwi/libraries.txt). Démarrer la simulation, puis ouvrir **Capteurs IoT → Wokwi / ESP32**. Le moniteur série du sketch du dépôt affiche le broker, le sujet et le résultat de chaque publication. Le tableau de bord indique séparément la connexion MQTT et l’heure du dernier relevé. Pour Render, le Blueprint configure `broker.hivemq.com:1883` et `Zitori/Zitori/data`, les mêmes paramètres que le sketch. Le broker public sert aux données de démonstration.
 
 Le message JSON attendu contient `device_id`, `temperature_c`, `humidity_pct` et `power_w`. Les messages invalides ou retenus sont ignorés. Le backend prend également en charge `MQTT_USER`, `MQTT_PASSWORD`, `MQTT_TLS=1` et `MQTT_CA_CERT` pour un broker authentifié compatible. Le sketch Wokwi fourni utilise MQTT en clair.
 
