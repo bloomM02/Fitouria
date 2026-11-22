@@ -14,6 +14,7 @@ COPY backend/ backend/
 COPY --from=frontend /build/dist frontend/dist
 RUN useradd --system --create-home fitouria && mkdir /app/data && chown fitouria /app/data
 ENV FITOURIA_DB=/app/data/fitouria.sqlite3
+ENV MQTT_HOST=broker.hivemq.com MQTT_PORT=1883 MQTT_TOPIC=Zitori/Zitori/data
 USER fitouria
 EXPOSE 10000
 CMD ["sh", "-c", "exec python -m uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
